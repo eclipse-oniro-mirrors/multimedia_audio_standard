@@ -14,8 +14,11 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
+pulseaudio_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_dir = "//third_party/libsnd"
+libsndfile_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("pulsecommon_config") {
   visibility = [ ":*" ]
@@ -26,7 +29,7 @@ config("pulsecommon_config") {
     "$pulseaudio_dir",
     "$pulseaudio_build_path/src",
     "$pulseaudio_build_path/include",
-    "$libsndfile_build_path/include",
+    "$libsndfile_dir/include",
     "$pulseaudio_dir/src/pulse",
   ]
 
@@ -36,28 +39,31 @@ config("pulsecommon_config") {
     "-Wno-implicit-function-declaration",
     "-Wno-unused-function",
     "-DHAVE_CONFIG_H",
-     "-D_GNU_SOURCE",
+    "-D_GNU_SOURCE",
   ]
 }
 
 ohos_source_set("pulsecommon_sources") {
   sources = [
+    "$pulseaudio_dir/src/pulse/channelmap.c",
     "$pulseaudio_dir/src/pulse/client-conf.c",
     "$pulseaudio_dir/src/pulse/error.c",
     "$pulseaudio_dir/src/pulse/fork-detect.c",
     "$pulseaudio_dir/src/pulse/format.c",
     "$pulseaudio_dir/src/pulse/json.c",
     "$pulseaudio_dir/src/pulse/mainloop-api.c",
-    "$pulseaudio_dir/src/pulse/xmalloc.c",
+    "$pulseaudio_dir/src/pulse/ohos_pa_volume.c",
     "$pulseaudio_dir/src/pulse/proplist.c",
-    "$pulseaudio_dir/src/pulse/utf8.c",
-    "$pulseaudio_dir/src/pulse/channelmap.c",
-    "$pulseaudio_dir/src/pulse/sample.c",
-    "$pulseaudio_dir/src/pulse/util.c",
-    "$pulseaudio_dir/src/pulse/timeval.c",
     "$pulseaudio_dir/src/pulse/rtclock.c",
-    "$pulseaudio_build_path/src/pulse/ohos_pa_volume.c",
+    "$pulseaudio_dir/src/pulse/sample.c",
+    "$pulseaudio_dir/src/pulse/timeval.c",
+    "$pulseaudio_dir/src/pulse/utf8.c",
+    "$pulseaudio_dir/src/pulse/util.c",
+    "$pulseaudio_dir/src/pulse/xmalloc.c",
+    "$pulseaudio_dir/src/pulsecore/arpa-inet.c",
+    "$pulseaudio_dir/src/pulsecore/aupdate.c",
     "$pulseaudio_dir/src/pulsecore/authkey.c",
+    "$pulseaudio_dir/src/pulsecore/bitset.c",
     "$pulseaudio_dir/src/pulsecore/conf-parser.c",
     "$pulseaudio_dir/src/pulsecore/core-error.c",
     "$pulseaudio_dir/src/pulsecore/core-format.c",
@@ -70,17 +76,17 @@ ohos_source_set("pulsecommon_sources") {
     "$pulseaudio_dir/src/pulsecore/hashmap.c",
     "$pulseaudio_dir/src/pulsecore/i18n.c",
     "$pulseaudio_dir/src/pulsecore/idxset.c",
-    "$pulseaudio_dir/src/pulsecore/arpa-inet.c",
     "$pulseaudio_dir/src/pulsecore/iochannel.c",
     "$pulseaudio_dir/src/pulsecore/ioline.c",
     "$pulseaudio_dir/src/pulsecore/ipacl.c",
     "$pulseaudio_dir/src/pulsecore/lock-autospawn.c",
     "$pulseaudio_dir/src/pulsecore/log.c",
-    "$pulseaudio_dir/src/pulsecore/ratelimit.c",
     "$pulseaudio_dir/src/pulsecore/mcalign.c",
     "$pulseaudio_dir/src/pulsecore/memblock.c",
     "$pulseaudio_dir/src/pulsecore/memblockq.c",
     "$pulseaudio_dir/src/pulsecore/memchunk.c",
+    "$pulseaudio_dir/src/pulsecore/memtrap.c",
+    "$pulseaudio_dir/src/pulsecore/mutex-posix.c",
     "$pulseaudio_dir/src/pulsecore/native-common.c",
     "$pulseaudio_dir/src/pulsecore/once.c",
     "$pulseaudio_dir/src/pulsecore/packet.c",
@@ -88,30 +94,27 @@ ohos_source_set("pulsecommon_sources") {
     "$pulseaudio_dir/src/pulsecore/pdispatch.c",
     "$pulseaudio_dir/src/pulsecore/pid.c",
     "$pulseaudio_dir/src/pulsecore/pipe.c",
-    "$pulseaudio_dir/src/pulsecore/memtrap.c",
-    "$pulseaudio_dir/src/pulsecore/aupdate.c",
     "$pulseaudio_dir/src/pulsecore/proplist-util.c",
     "$pulseaudio_dir/src/pulsecore/pstream-util.c",
     "$pulseaudio_dir/src/pulsecore/pstream.c",
     "$pulseaudio_dir/src/pulsecore/queue.c",
     "$pulseaudio_dir/src/pulsecore/random.c",
-    "$pulseaudio_dir/src/pulsecore/srbchannel.c",
+    "$pulseaudio_dir/src/pulsecore/ratelimit.c",
     "$pulseaudio_dir/src/pulsecore/sample-util.c",
+    "$pulseaudio_dir/src/pulsecore/semaphore-posix.c",
     "$pulseaudio_dir/src/pulsecore/shm.c",
-    "$pulseaudio_dir/src/pulsecore/bitset.c",
+    "$pulseaudio_dir/src/pulsecore/sndfile-util.c",
     "$pulseaudio_dir/src/pulsecore/socket-client.c",
     "$pulseaudio_dir/src/pulsecore/socket-server.c",
     "$pulseaudio_dir/src/pulsecore/socket-util.c",
+    "$pulseaudio_dir/src/pulsecore/srbchannel.c",
     "$pulseaudio_dir/src/pulsecore/strbuf.c",
     "$pulseaudio_dir/src/pulsecore/strlist.c",
     "$pulseaudio_dir/src/pulsecore/tagstruct.c",
+    "$pulseaudio_dir/src/pulsecore/thread-posix.c",
     "$pulseaudio_dir/src/pulsecore/time-smoother.c",
     "$pulseaudio_dir/src/pulsecore/tokenizer.c",
     "$pulseaudio_dir/src/pulsecore/usergroup.c",
-    "$pulseaudio_dir/src/pulsecore/sndfile-util.c",
-    "$pulseaudio_dir/src/pulsecore/mutex-posix.c",
-    "$pulseaudio_dir/src/pulsecore/semaphore-posix.c",
-    "$pulseaudio_dir/src/pulsecore/thread-posix.c",
   ]
 
   configs = [ ":pulsecommon_config" ]
@@ -127,7 +130,7 @@ ohos_shared_library("pulsecommon") {
   part_name = "multimedia_audio_standard"
 }
 ohos_prebuilt_etc("pa_daemon_config") {
-  source = "$pulseaudio_build_path/conf/daemon.conf"
+  source = "$pulseaudio_dir/conf/daemon.conf"
 
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
@@ -135,16 +138,15 @@ ohos_prebuilt_etc("pa_daemon_config") {
 }
 
 ohos_prebuilt_etc("pa_default_config") {
-  source = "$pulseaudio_build_path/conf/default.pa"
+  source = "$pulseaudio_dir/conf/default.pa"
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
   part_name = "multimedia_audio_standard"
 }
 
 ohos_prebuilt_etc("pa_client_config") {
-  source = "$pulseaudio_build_path/conf/client.conf"
+  source = "$pulseaudio_dir/conf/client.conf"
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
   part_name = "multimedia_audio_standard"
 }
-

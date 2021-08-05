@@ -14,12 +14,14 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+pulseaudio_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
 
 config("pulse_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "$pulseaudio_dir/include",
     "$pulseaudio_dir/src/pulse",
     "$pulseaudio_dir/src",
     "$pulseaudio_dir",
@@ -55,6 +57,7 @@ ohos_source_set("pulse_sources") {
     "$pulseaudio_dir/src/pulse/mainloop-api.c",
     "$pulseaudio_dir/src/pulse/mainloop-signal.c",
     "$pulseaudio_dir/src/pulse/mainloop.c",
+    "$pulseaudio_dir/src/pulse/ohos_pa_volume.c",
     "$pulseaudio_dir/src/pulse/operation.c",
     "$pulseaudio_dir/src/pulse/proplist.c",
     "$pulseaudio_dir/src/pulse/rtclock.c",
@@ -66,13 +69,10 @@ ohos_source_set("pulse_sources") {
     "$pulseaudio_dir/src/pulse/timeval.c",
     "$pulseaudio_dir/src/pulse/utf8.c",
     "$pulseaudio_dir/src/pulse/util.c",
-    "$pulseaudio_build_path/src/pulse/ohos_pa_volume.c",
     "$pulseaudio_dir/src/pulse/xmalloc.c",
   ]
 
-  configs = [
-    ":pulse_config",
-  ]
+  configs = [ ":pulse_config" ]
 }
 
 ohos_shared_library("pulse") {
@@ -100,7 +100,7 @@ ohos_shared_library("pulse-simple") {
 }
 
 ohos_shared_library("pulse-mainloop-glib") {
-  sources = [ "$pulseaudio_build_path/src/pulse/ohos_glib-mainloop.c" ]
+  sources = [ "$pulseaudio_dir/src/pulse/ohos_glib-mainloop.c" ]
 
   configs = [ ":pulse_config" ]
   deps = [
