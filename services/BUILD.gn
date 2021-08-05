@@ -12,17 +12,18 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-AUDIO_POLICY_SERVER_DIR = "//foundation/multimedia/audio_standard/services/src/audio_policy/server"
+AUDIO_POLICY_SERVER_DIR =
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server"
 
 ohos_prebuilt_etc("pulseaudio.rc") {
-   if (use_musl) {
-     source = "etc/pulseaudio.cfg"
-   } else {
-     source = "etc/pulseaudio.rc"
-   }
-   relative_install_dir = "init"
-   part_name = "multimedia_audio_standard"
-   subsystem_name = "multimedia"
+  if (use_musl) {
+    source = "etc/pulseaudio.cfg"
+  } else {
+    source = "etc/pulseaudio.rc"
+  }
+  relative_install_dir = "init"
+  part_name = "multimedia_audio_standard"
+  subsystem_name = "multimedia"
 }
 
 config("audio_service_config") {
@@ -34,7 +35,7 @@ config("audio_service_config") {
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiocapturer/include",
-    "//drivers/peripheral/audio/interfaces/include"
+    "//drivers/peripheral/audio/interfaces/include",
   ]
 
   if (target_cpu == "arm") {
@@ -53,17 +54,17 @@ ohos_shared_library("audio_service") {
   configs = [ ":audio_service_config" ]
 
   deps = [
-     "//utils/native/base:utils",
-     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager:audio_client",
-     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/daemon:pulseaudio",
-     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiocapturer:audio_capturer_source",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiocapturer:audio_capturer_source",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/daemon:pulseaudio",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager:audio_client",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
-    "ipc:ipc_core",
-    "samgr_L2:samgr_proxy",
-    "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_L2:samgr_proxy",
   ]
 
   subsystem_name = "multimedia"
@@ -71,22 +72,22 @@ ohos_shared_library("audio_service") {
 }
 
 group("audio_policy_service_packages") {
-    deps = [
-            ":audio_policy.rc",
-            ":audio_policy_service",
-            ":audio_policy_config",
-    ]
+  deps = [
+    ":audio_policy.rc",
+    ":audio_policy_config",
+    ":audio_policy_service",
+  ]
 }
 
 ohos_prebuilt_etc("audio_policy.rc") {
-   if (use_musl) {
-     source = "etc/audio_policy.cfg"
-   } else {
-     source = "etc/audio_policy.rc"
-   }
-   relative_install_dir = "init"
-   part_name = "multimedia_audio_standard"
-   subsystem_name = "multimedia"
+  if (use_musl) {
+    source = "etc/audio_policy.cfg"
+  } else {
+    source = "etc/audio_policy.rc"
+  }
+  relative_install_dir = "init"
+  part_name = "multimedia_audio_standard"
+  subsystem_name = "multimedia"
 }
 
 config("audio_policy_public_config") {
@@ -113,6 +114,7 @@ config("audio_policy_public_config") {
     "//third_party/libxml2/include",
     "//third_party/pulseaudio/src",
     "//third_party/pulseaudio/confgure/src",
+    "//third_party/pulseaudio/include",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/include",
     "//utils/system/safwk/native/include",
     "//utils/native/base/include",
@@ -120,8 +122,8 @@ config("audio_policy_public_config") {
   ]
 
   cflags = [
-        "-Wall",
-        "-Werror",
+    "-Wall",
+    "-Werror",
   ]
 
   if (target_cpu == "arm") {
@@ -132,30 +134,28 @@ config("audio_policy_public_config") {
 ohos_shared_library("audio_policy_service") {
   install_enable = true
   sources = [
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_server.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_manager_stub.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_server.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/audio_policy_service.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/manager/pulseaudio_policy_manager.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/config/xml_parser.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/manager/pulseaudio_policy_manager.cpp",
   ]
 
-  public_configs = [
-    ":audio_policy_public_config",
-  ]
+  public_configs = [ ":audio_policy_public_config" ]
 
   deps = [
-   "//utils/native/base:utils",
-   "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/pulse:pulse",
-   "//third_party/libxml2:xml2",
-   "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
-   "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
+    "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
+    "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/pulse:pulse",
+    "//third_party/libxml2:xml2",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
-    "ipc:ipc_core",
-    "samgr_L2:samgr_proxy",
-    "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_L2:samgr_proxy",
   ]
   subsystem_name = "multimedia"
   part_name = "multimedia_audio_standard"

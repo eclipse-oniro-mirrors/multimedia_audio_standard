@@ -14,18 +14,22 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
+pulseaudio_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_dir = "//third_party/libsnd"
+libsndfile_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("pulseutils_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
     "$pulseaudio_dir",
+    "$pulseaudio_dir/include",
     "$pulseaudio_build_path/src",
     "$pulseaudio_build_path/include",
     "$pulseaudio_dir/src",
-    "$libsndfile_build_path/include",
+    "$libsndfile_dir/include",
   ]
 
   cflags = [
@@ -38,15 +42,14 @@ config("pulseutils_config") {
 }
 
 ohos_executable("pacat") {
-
   sources = [ "$pulseaudio_dir/src/utils/pacat.c" ]
 
   configs = [ ":pulseutils_config" ]
 
   deps = [
-    "$pulseaudio_build_path/src/pulse:pulse",
-    "$pulseaudio_build_path/src:pulsecommon",
     "$libsndfile_build_path:sndfile",
+    "$pulseaudio_build_path/src:pulsecommon",
+    "$pulseaudio_build_path/src/pulse:pulse",
   ]
 
   subsystem_name = "multimedia"
@@ -59,16 +62,15 @@ ohos_executable("pactl") {
   configs = [ ":pulseutils_config" ]
 
   deps = [
-    "$pulseaudio_build_path/src/pulse:pulse",
-    "$pulseaudio_build_path/src:pulsecommon",
     "$libsndfile_build_path:sndfile",
+    "$pulseaudio_build_path/src:pulsecommon",
+    "$pulseaudio_build_path/src/pulse:pulse",
   ]
   subsystem_name = "multimedia"
   part_name = "multimedia_audio_standard"
 }
 
 ohos_executable("pacmd") {
-
   install_enable = true
 
   sources = [ "$pulseaudio_dir/src/utils/pacmd.c" ]
@@ -76,8 +78,8 @@ ohos_executable("pacmd") {
   configs = [ ":pulseutils_config" ]
 
   deps = [
-    "$pulseaudio_build_path/src/pulse:pulse",
     "$pulseaudio_build_path/src:pulsecommon",
+    "$pulseaudio_build_path/src/pulse:pulse",
   ]
 
   subsystem_name = "multimedia"

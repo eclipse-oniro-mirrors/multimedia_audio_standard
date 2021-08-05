@@ -14,20 +14,24 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
+pulseaudio_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_dir = "//third_party/libsnd"
+libsndfile_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("pulsecore_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "$pulseaudio_dir/include",
     "$pulseaudio_dir",
     "$pulseaudio_dir/src",
     "$pulseaudio_build_path/include",
     "$pulseaudio_build_path/src",
     "//third_party/glib/glib",
     "//third_party/glib",
-    "$libsndfile_build_path/include",
+    "$libsndfile_dir/include",
   ]
 
   cflags = [
@@ -55,13 +59,15 @@ ohos_source_set("pulsecore_sources") {
     "$pulseaudio_dir/src/pulsecore/core-scache.c",
     "$pulseaudio_dir/src/pulsecore/core-subscribe.c",
     "$pulseaudio_dir/src/pulsecore/core.c",
+
     #"$pulseaudio_dir/src/pulsecore/cpu.c",
     "$pulseaudio_dir/src/pulsecore/cpu-arm.c",
+    "$pulseaudio_dir/src/pulsecore/database-simple.c",
+    "$pulseaudio_dir/src/pulsecore/database.c",
+
     #"$pulseaudio_dir/src/pulsecore/cpu-orc.c",
     #"$pulseaudio_dir/src/pulsecore/cpu-x86.c",
     "$pulseaudio_dir/src/pulsecore/device-port.c",
-    "$pulseaudio_dir/src/pulsecore/database.c",
-    "$pulseaudio_dir/src/pulsecore/database-simple.c",
     "$pulseaudio_dir/src/pulsecore/ffmpeg/resample2.c",
     "$pulseaudio_dir/src/pulsecore/filter/biquad.c",
     "$pulseaudio_dir/src/pulsecore/filter/crossover.c",
@@ -88,13 +94,13 @@ ohos_source_set("pulsecore_sources") {
     "$pulseaudio_dir/src/pulsecore/sconv-s16le.c",
     "$pulseaudio_dir/src/pulsecore/sconv.c",
     "$pulseaudio_dir/src/pulsecore/shared.c",
-    "$pulseaudio_dir/src/pulsecore/sink.c",
     "$pulseaudio_dir/src/pulsecore/sink-input.c",
+    "$pulseaudio_dir/src/pulsecore/sink.c",
     "$pulseaudio_dir/src/pulsecore/sioman.c",
     "$pulseaudio_dir/src/pulsecore/sound-file-stream.c",
     "$pulseaudio_dir/src/pulsecore/sound-file.c",
-    "$pulseaudio_dir/src/pulsecore/source.c",
     "$pulseaudio_dir/src/pulsecore/source-output.c",
+    "$pulseaudio_dir/src/pulsecore/source.c",
     "$pulseaudio_dir/src/pulsecore/start-child.c",
     "$pulseaudio_dir/src/pulsecore/stream-util.c",
     "$pulseaudio_dir/src/pulsecore/svolume_arm.c",
@@ -110,8 +116,8 @@ ohos_source_set("pulsecore_sources") {
 ohos_shared_library("pulsecore") {
   deps = [
     ":pulsecore_sources",
-    "$pulseaudio_build_path/src:pulsecommon",
     "$libsndfile_build_path:sndfile",
+    "$pulseaudio_build_path/src:pulsecommon",
   ]
 
   subsystem_name = "multimedia"
@@ -123,6 +129,7 @@ config("modules_internal_lib_config") {
 
   include_dirs = [
     "$pulseaudio_build_path/include",
+    "$pulseaudio_dir/include",
     "$pulseaudio_dir/src",
     "$pulseaudio_dir",
     "$pulseaudio_build_path/src",
@@ -159,8 +166,8 @@ ohos_shared_library("protocol-cli") {
 
   deps = [
     "$pulseaudio_build_path/src:pulsecommon",
-    "$pulseaudio_build_path/src/pulsecore:pulsecore",
     "$pulseaudio_build_path/src/pulsecore:cli",
+    "$pulseaudio_build_path/src/pulsecore:pulsecore",
   ]
 
   subsystem_name = "multimedia"

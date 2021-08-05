@@ -14,17 +14,18 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+pulseaudio_build_path =
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
 
 group("modules") {
   deps = [
+    ":module-cli-protocol-unix",
     ":module-native-protocol-fd",
     ":module-native-protocol-tcp",
     ":module-native-protocol-unix",
-    ":module-cli-protocol-unix",
     ":module-pipe-sink",
     ":module-pipe-source",
-    ":module-suspend-on-idle"
+    ":module-suspend-on-idle",
   ]
 }
 
@@ -39,6 +40,7 @@ config("common_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "$pulseaudio_dir/include",
     "$pulseaudio_dir/src/modules",
     "$pulseaudio_dir/src",
     "$pulseaudio_dir",
@@ -62,7 +64,7 @@ ohos_shared_library("module-native-protocol-fd") {
     "-Wl",
     "--no-undefined",
   ]
-    configs = [ ":common_config" ]
+  configs = [ ":common_config" ]
   deps = [
     ":common_deps",
     "$pulseaudio_build_path/src/pulsecore:protocol-native",
@@ -150,7 +152,7 @@ ohos_shared_library("module-pipe-sink") {
 }
 
 ohos_shared_library("module-pipe-source") {
-  sources = ["$pulseaudio_dir/src/modules/module-pipe-source.c",]
+  sources = [ "$pulseaudio_dir/src/modules/module-pipe-source.c" ]
   cflags = [ "-DPA_MODULE_NAME=libmodule_pipe_source_z_so" ]
 
   ldflags = [
@@ -166,7 +168,7 @@ ohos_shared_library("module-pipe-source") {
 }
 
 ohos_shared_library("module-suspend-on-idle") {
-  sources = ["$pulseaudio_dir/src/modules/module-suspend-on-idle.c",]
+  sources = [ "$pulseaudio_dir/src/modules/module-suspend-on-idle.c" ]
   cflags = [ "-DPA_MODULE_NAME=libmodule_suspend_on_idle_z_so" ]
 
   ldflags = [
