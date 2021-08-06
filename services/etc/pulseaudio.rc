@@ -14,14 +14,16 @@
 service pulseaudio /system/bin/sa_main /system/profile/pulseaudio.xml
     class z_core
     seclabel u:r:audiodistributedservice:s0
+    user system
+    group system shell
     disabled
 
 on post-fs-data
-    mkdir /data/local/.pulse_dir
-    chmod 755 /data/local/.pulse_dir
-    chown system shell /data/local/.pulse_dir
-    export PULSE_STATE_PATH "/data/local/.pulse_dir"
-    export PULSE_RUNTIME_PATH "/data/local/.pulse_dir"
+    mkdir /data/data/.pulse_dir
+    chmod 777 /data/data/.pulse_dir
+    chown system system /data/data/.pulse_dir
+    export PULSE_STATE_PATH "/data/data/.pulse_dir"
+    export PULSE_RUNTIME_PATH "/data/data/.pulse_dir"
     start pulseaudio
     exec /system/bin/sleep 4
     trigger audio_policy_start
