@@ -14,6 +14,8 @@
 service audio_policy /system/bin/sa_main /system/profile/audio_policy.xml
     class z_core
     seclabel u:r:audiodistributedservice:s0
+    user system
+    group system shell
     disabled
 
 on audio_policy_start
