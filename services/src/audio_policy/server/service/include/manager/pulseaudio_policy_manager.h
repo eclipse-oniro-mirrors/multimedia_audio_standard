@@ -123,8 +123,7 @@ private:
     void InitVolumeMap(bool isFirstBoot);
     bool LoadVolumeMap(void);
     void WriteVolumeToKvStore(AudioStreamType streamType, float volume);
-    bool LoadVolumeFromKvStore(std::unique_ptr<KvStoreSnapshot>& audioPolicyKvStoreSnapshot,
-                                AudioStreamType streamType);
+    bool LoadVolumeFromKvStore(AudioStreamType streamType);
     void InitRingerMode(bool isFirstBoot);
     bool LoadRingerMode(void);
     void WriteRingerModeToKvStore(AudioRingerMode ringerMode);
@@ -133,7 +132,7 @@ private:
     pa_threaded_mainloop* mMainLoop;
     std::unordered_map<AudioStreamType, float> mVolumeMap;
     AudioRingerMode mRingerMode;
-    std::unique_ptr<KvStore> mAudioPolicyKvStore;
+    std::unique_ptr<SingleKvStore> mAudioPolicyKvStore;
 };
 } // namespace AudioStandard
 } // namespace OHOS
