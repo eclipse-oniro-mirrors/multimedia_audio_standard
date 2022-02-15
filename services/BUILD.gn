@@ -73,7 +73,6 @@ ohos_shared_library("audio_service") {
 
 group("audio_policy_service_packages") {
   deps = [
-    ":audio_dump",
     ":audio_interrupt_policy_config",
     ":audio_policy.rc",
     ":audio_policy_config",
@@ -130,24 +129,6 @@ config("audio_policy_public_config") {
   }
 }
 
-ohos_shared_library("audio_dump") {
-  install_enable = true
-  sources = [ "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_service_dump.cpp" ]
-
-  public_configs = [ ":audio_policy_public_config" ]
-
-  deps = [
-    "//foundation/multimedia/audio_standard/frameworks/native/pulseaudio/src/pulse:pulse",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//utils/native/base:utils",
-  ]
-
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-
-  subsystem_name = "multimedia"
-  part_name = "multimedia_audio_standard"
-}
-
 ohos_shared_library("audio_policy_service") {
   install_enable = true
   sources = [
@@ -175,7 +156,6 @@ ohos_shared_library("audio_policy_service") {
     "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
     "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
     "//foundation/multimedia/audio_standard/frameworks/native/audioadapter:pulse_audio_service_adapter",
-    "//foundation/multimedia/audio_standard/services:audio_dump",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/multimodalinput/input/frameworks/util:libmmi-util",
     "//third_party/libxml2:xml2",

@@ -553,9 +553,6 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     mStreamType = audioType;
     const std::string streamName = GetStreamName(audioType);
 
-    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    const std::string StreamStartTime = ctime(&timenow);
-
     sampleSpec = ConvertToPAAudioParams(audioParams);
 
     pa_proplist *propList = pa_proplist_new();
@@ -568,7 +565,6 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     pa_proplist_sets(propList, "stream.type", streamName.c_str());
     pa_proplist_sets(propList, "stream.volumeFactor", std::to_string(mVolumeFactor).c_str());
     pa_proplist_sets(propList, "stream.sessionID", std::to_string(pa_context_get_index(context)).c_str());
-    pa_proplist_sets(propList, "stream.startTime", StreamStartTime.c_str());
 
     if (!(paStream = pa_stream_new_with_proplist(context, streamName.c_str(), &sampleSpec, NULL, propList))) {
         error = pa_context_errno(context);
