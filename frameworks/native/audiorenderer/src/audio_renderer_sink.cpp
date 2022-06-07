@@ -463,7 +463,9 @@ int32_t AudioRendererSink::SetAudioScene(AudioScene audioScene)
             return ERR_OPERATION_FAILED;
         }
 
+        AUDIO_INFO_LOG("AudioRendererSink::SelectScene start");
         ret = audioRender_->scene.SelectScene((AudioHandle)audioRender_, &scene);
+        AUDIO_INFO_LOG("AudioRendererSink::SelectScene over");
         if (ret < 0) {
             AUDIO_ERR_LOG("AudioRendererSink: Select scene FAILED: %{public}d", ret);
             return ERR_OPERATION_FAILED;
