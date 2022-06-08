@@ -212,18 +212,19 @@ bool AudioServer::IsMicrophoneMute()
 
 int32_t AudioServer::SetAudioScene(AudioScene audioScene)
 {
-    AudioRendererSink *audioRendererSinkInstance = AudioRendererSink::GetInstance();
-    if (!audioRendererSinkInstance->rendererInited_) {
-        AUDIO_WARNING_LOG("Renderer is not initialized.");
-    } else {
-        audioRendererSinkInstance->SetAudioScene(audioScene);
-    }
-
     AudioCapturerSource *audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
+    AudioRendererSink *audioRendererSinkInstance = AudioRendererSink::GetInstance();
+
     if (!audioCapturerSourceInstance->capturerInited_) {
         AUDIO_WARNING_LOG("Capturer is not initialized.");
     } else {
         audioCapturerSourceInstance->SetAudioScene(audioScene);
+    }
+
+    if (!audioRendererSinkInstance->rendererInited_) {
+        AUDIO_WARNING_LOG("Renderer is not initialized.");
+    } else {
+        audioRendererSinkInstance->SetAudioScene(audioScene);
     }
 
     return SUCCESS;

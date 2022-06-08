@@ -449,7 +449,9 @@ int32_t AudioCapturerSource::SetAudioScene(AudioScene audioScene)
             return ERR_OPERATION_FAILED;
         }
 
+        AUDIO_INFO_LOG("AudioCapturerSource::SelectScene start");
         ret = audioCapture_->scene.SelectScene((AudioHandle)audioCapture_, &scene);
+        AUDIO_INFO_LOG("AudioCapturerSource::SelectScene over");
         if (ret < 0) {
             AUDIO_ERR_LOG("AudioCapturerSource: Select scene FAILED: %{public}d", ret);
             return ERR_OPERATION_FAILED;
