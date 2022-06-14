@@ -59,7 +59,7 @@ public:
 
     int32_t SetStreamMute(AudioStreamType streamType, bool mute);
 
-    bool GetStreamMute(AudioStreamType streamType) const;
+    bool GetStreamMute(AudioStreamType streamType);
 
     bool IsStreamActive(AudioStreamType streamType);
 
@@ -116,9 +116,14 @@ private:
     void InitRingerMode(bool isFirstBoot);
     bool LoadRingerMode(void);
     void WriteRingerModeToKvStore(AudioRingerMode ringerMode);
-
+    void InitMuteStatusMap(bool isFirstBoot);
+    bool LoadMuteStatusMap(void);
+    bool LoadMuteStatusFromKvStore(AudioStreamType streamType);
+    void WriteMuteStatusToKvStore(AudioStreamType streamType, bool muteStatus);
+    std::string GetStreamTypeKeyForMute(AudioStreamType streamType);
     std::unique_ptr<AudioServiceAdapter> mAudioServiceAdapter;
     std::unordered_map<AudioStreamType, float> mVolumeMap;
+    std::unordered_map<AudioStreamType, int> mMuteStatusMap;
     AudioRingerMode mRingerMode;
     std::shared_ptr<SingleKvStore> mAudioPolicyKvStore;
 
@@ -148,6 +153,9 @@ public:
             }
         }
 
+        if (audioAdapterManager_->GetStreamMute(streamForVolumeMap)) {
+            return AudioAdapterManager::MIN_VOLUME;
+        }
         return audioAdapterManager_->mVolumeMap[streamForVolumeMap];
     }
 

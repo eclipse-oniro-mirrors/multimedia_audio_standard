@@ -529,6 +529,7 @@ private:
     std::string cachePath_ = "";
 
     float mVolumeFactor;
+    bool mUnMute_;
     AudioStreamType mStreamType;
     AudioSystemManager *mAudioSystemMgr;
 

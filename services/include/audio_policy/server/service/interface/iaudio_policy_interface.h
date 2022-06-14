@@ -43,7 +43,7 @@ public:
 
     virtual int32_t SetStreamMute(AudioStreamType streamType, bool mute) = 0;
 
-    virtual bool GetStreamMute(AudioStreamType streamType) const = 0;
+    virtual bool GetStreamMute(AudioStreamType streamType) = 0;
 
     virtual bool IsStreamActive(AudioStreamType streamType) = 0;
 
