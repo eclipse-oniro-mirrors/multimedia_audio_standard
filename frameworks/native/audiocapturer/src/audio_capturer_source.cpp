@@ -32,7 +32,8 @@ bool AudioCapturerSource::micMuteState_ = false;
 
 AudioCapturerSource::AudioCapturerSource()
     : capturerInited_(false), started_(false), paused_(false), leftVolume_(MAX_VOLUME_LEVEL),
-      rightVolume_(MAX_VOLUME_LEVEL), audioManager_(nullptr), audioAdapter_(nullptr), audioCapture_(nullptr)
+      rightVolume_(MAX_VOLUME_LEVEL), openMic_(0), audioManager_(nullptr), audioAdapter_(nullptr),
+      audioCapture_(nullptr)
 {
     attr_ = {};
 #ifdef CAPTURE_DUMP

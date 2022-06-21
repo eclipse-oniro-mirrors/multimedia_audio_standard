@@ -60,7 +60,7 @@ private:
     struct HDI::Audio_Bluetooth::AudioProxyManager *audioManager_;
     struct HDI::Audio_Bluetooth::AudioAdapter *audioAdapter_;
     struct HDI::Audio_Bluetooth::AudioRender *audioRender_;
-    struct HDI::Audio_Bluetooth::AudioPort audioPort;
+    struct HDI::Audio_Bluetooth::AudioPort audioPort = {};
     void *handle_;
 
     int32_t CreateRender(struct HDI::Audio_Bluetooth::AudioPort &renderPort);

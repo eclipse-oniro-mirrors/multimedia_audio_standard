@@ -610,7 +610,15 @@ void AudioServiceClient::SetEnv()
 void AudioServiceClient::SetApplicationCachePath(const std::string cachePath)
 {
     AUDIO_DEBUG_LOG("SetApplicationCachePath in");
-    cachePath_ = cachePath;
+
+    char realPath[PATH_MAX] = {0x00};
+
+    if ((strlen(cachePath.c_str()) >= PATH_MAX) || (realpath(cachePath.c_str(), realPath) == nullptr)) {
+        AUDIO_ERR_LOG("Invalid cache path. err = %{public}d", errno);
+        return;
+    }
+
+    cachePath_ = realPath;
 }
 
 bool AudioServiceClient::VerifyClientPermission(const std::string &permissionName, uint32_t appTokenId)
@@ -2071,7 +2079,7 @@ void AudioServiceClient::WriteStateChangedSysEvents()
     uint32_t sessionID = 0;
     uint64_t transactionId = 0;
     int32_t callingPid = getpid();
-    int32_t callingUid = getuid();
+    uint32_t callingUid = getuid();
 
     bool isOutput = true;
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {

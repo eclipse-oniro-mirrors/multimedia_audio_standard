@@ -227,14 +227,17 @@ static void thread_func(void *userdata)
             now = pa_rtclock_now();
             AUDIO_DEBUG_LOG("HDI Source: now: %{public}" PRIu64 " timer_elapsed: %{public}d", now, timer_elapsed);
 
-            if (timer_elapsed && (chunk.length = pa_usec_to_bytes(now - u->timestamp, &u->source->sample_spec)) > 0) {
-                ret = get_capturer_frame_from_hdi(&chunk, u);
-                if (ret != 0) {
-                    break;
-                }
+            if (timer_elapsed) {
+                chunk.length = pa_usec_to_bytes(now - u->timestamp, &u->source->sample_spec);
+                if (chunk.length > 0) {
+                    ret = get_capturer_frame_from_hdi(&chunk, u);
+                    if (ret != 0) {
+                        break;
+                    }
 
-                u->timestamp += pa_bytes_to_usec(chunk.length, &u->source->sample_spec);
-                AUDIO_DEBUG_LOG("HDI Source: new u->timestamp : %{public}" PRIu64, u->timestamp);
+                    u->timestamp += pa_bytes_to_usec(chunk.length, &u->source->sample_spec);
+                    AUDIO_DEBUG_LOG("HDI Source: new u->timestamp : %{public}" PRIu64, u->timestamp);
+                }
             }
 
             pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp + u->block_usec);
