@@ -56,6 +56,7 @@ void AudioAdapterManager::InitKVStore()
     InitAudioPolicyKvStore(isFirstBoot);
     InitVolumeMap(isFirstBoot);
     InitRingerMode(isFirstBoot);
+    InitMuteStatusMap(isFirstBoot);
 }
 
 void AudioAdapterManager::Deinit(void)
@@ -92,6 +93,9 @@ int32_t AudioAdapterManager::SetStreamVolume(AudioStreamType streamType, float v
         InitAudioPolicyKvStore(isFirstBoot);
     }
 
+    if (GetStreamMute(streamType) && volume > 0.0f) {
+        SetStreamMute(streamType, 0);
+    }
     AudioStreamType streamForVolumeMap = GetStreamForVolumeMap(streamType);
     mVolumeMap[streamForVolumeMap] = volume;
     WriteVolumeToKvStore(streamType, volume);
@@ -112,18 +116,20 @@ int32_t AudioAdapterManager::SetStreamMute(AudioStreamType streamType, bool mute
         AUDIO_ERR_LOG("[AudioAdapterManager] audio adapter null");
         return ERR_OPERATION_FAILED;
     }
-
+    AudioStreamType streamForVolumeMap = GetStreamForVolumeMap(streamType);
+    mMuteStatusMap[streamForVolumeMap] = mute;
+    WriteMuteStatusToKvStore(streamType, mute);
     return mAudioServiceAdapter->SetMute(streamType, mute);
 }
 
-bool AudioAdapterManager::GetStreamMute(AudioStreamType streamType) const
+bool AudioAdapterManager::GetStreamMute(AudioStreamType streamType)
 {
     if (!mAudioServiceAdapter) {
         AUDIO_ERR_LOG("[AudioAdapterManager] audio adapter null");
         return false;
     }
-
-    return mAudioServiceAdapter->IsMute(streamType);
+    AudioStreamType streamForVolumeMap = GetStreamForVolumeMap(streamType);
+    return mMuteStatusMap[streamForVolumeMap];
 }
 
 bool AudioAdapterManager::IsStreamActive(AudioStreamType streamType)
@@ -602,6 +608,114 @@ void AudioAdapterManager::WriteRingerModeToKvStore(AudioRingerMode ringerMode)
         AUDIO_INFO_LOG("[AudioAdapterManager] Wrote RingerMode:%d to kvStore", ringerMode);
     } else {
         AUDIO_ERR_LOG("[AudioAdapterManager] Writing RingerMode:%d to kvStore failed!", ringerMode);
+    }
+
+    return;
+}
+
+void AudioAdapterManager::InitMuteStatusMap(bool isFirstBoot)
+{
+    if (isFirstBoot == true) {
+        WriteMuteStatusToKvStore(STREAM_MUSIC, 0);
+        WriteMuteStatusToKvStore(STREAM_RING, 0);
+        WriteMuteStatusToKvStore(STREAM_VOICE_CALL, 0);
+        WriteMuteStatusToKvStore(STREAM_VOICE_ASSISTANT, 0);
+        AUDIO_INFO_LOG("[AudioAdapterManager] Wrote default mute status to KvStore");
+    } else {
+        LoadMuteStatusMap();
+    }
+}
+
+
+bool AudioAdapterManager::LoadMuteStatusMap(void)
+{
+    if (mAudioPolicyKvStore == nullptr) {
+        AUDIO_ERR_LOG("[AudioAdapterManager] LoadMuteStatusMap: mAudioPolicyKvStore is null!");
+        return false;
+    }
+
+    if (!LoadMuteStatusFromKvStore(STREAM_MUSIC))
+        AUDIO_ERR_LOG("[AudioAdapterManager] Could not load mute status for MUSIC from kvStore!");
+
+    if (!LoadMuteStatusFromKvStore(STREAM_RING))
+        AUDIO_ERR_LOG("[AudioAdapterManager] Could not load mute status for RING from kvStore!");
+
+    if (!LoadMuteStatusFromKvStore(STREAM_VOICE_CALL))
+        AUDIO_ERR_LOG("[AudioAdapterManager] Could not load mute status for VOICE_CALL from kvStore!");
+
+    if (!LoadMuteStatusFromKvStore(STREAM_VOICE_ASSISTANT))
+        AUDIO_ERR_LOG("[AudioAdapterManager] Could not load mute status for VOICE_ASSISTANT from kvStore!");
+
+    return true;
+}
+
+bool AudioAdapterManager::LoadMuteStatusFromKvStore(AudioStreamType streamType)
+{
+    Value value;
+
+    switch (streamType) {
+        case STREAM_MUSIC:
+            break;
+        case STREAM_RING:
+            break;
+        case STREAM_VOICE_CALL:
+            break;
+        case STREAM_VOICE_ASSISTANT:
+            break;
+        default:
+            return false;
+    }
+    Key key = GetStreamTypeKeyForMute(streamType);
+    Status status = mAudioPolicyKvStore->Get(key, value);
+    if (status == Status::SUCCESS) {
+        int volumeStatus = TransferByteArrayToType<int>(value.Data());
+        mMuteStatusMap[streamType] = volumeStatus;
+        return true;
+    }
+
+    return false;
+}
+
+std::string AudioAdapterManager::GetStreamTypeKeyForMute(AudioStreamType streamType)
+{
+    switch (streamType) {
+        case STREAM_MUSIC:
+            return "music_mute_status";
+        case STREAM_RING:
+            return "ring_mute_status";
+        case STREAM_SYSTEM:
+            return "system_mute_status";
+        case STREAM_NOTIFICATION:
+            return "notification_mute_status";
+        case STREAM_ALARM:
+            return "alarm_mute_status";
+        case STREAM_DTMF:
+            return "dtmf_mute_status";
+        case STREAM_VOICE_CALL:
+            return "voice_call_mute_status";
+        case STREAM_VOICE_ASSISTANT:
+            return "voice_assistant_mute_status";
+        default:
+            return "";
+    }
+}
+
+void AudioAdapterManager::WriteMuteStatusToKvStore(AudioStreamType streamType, bool muteStatus)
+{
+    if (mAudioPolicyKvStore == nullptr) {
+        return;
+    }
+
+    Key key = GetStreamTypeKeyForMute(streamType);
+    Value value = Value(TransferTypeToByteArray<int>(muteStatus));
+
+    Status status = mAudioPolicyKvStore->Put(key, value);
+    if (status == Status::SUCCESS) {
+        AUDIO_INFO_LOG("[AudioAdapterManager] muteStatus %{public}d for %{public}s updated to kvStore", muteStatus,
+            GetStreamNameByStreamType(streamType).c_str());
+    } else {
+        AUDIO_INFO_LOG("[AudioAdapterManager] muteStatus %{public}d for %{public}s update to kvStore failed",
+            muteStatus, GetStreamNameByStreamType(streamType).c_str());
     }
 
     return;

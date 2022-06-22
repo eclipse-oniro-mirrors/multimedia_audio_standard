@@ -449,6 +449,7 @@ AudioServiceClient::AudioServiceClient()
     clientInfo.clear();
 
     mVolumeFactor = 1.0f;
+    mUnMute_ = false;
     mStreamType = STREAM_MUSIC;
     mAudioSystemMgr = nullptr;
 
@@ -1903,6 +1904,12 @@ int32_t AudioServiceClient::SetStreamVolume(float volume)
         return AUDIO_CLIENT_INVALID_PARAMS_ERR;
     }
 
+    int32_t volumeFactor = AudioSystemManager::MapVolumeFromHDI(mVolumeFactor);
+    int32_t newVolumeFactor = AudioSystemManager::MapVolumeFromHDI(volume);
+    if (newVolumeFactor > volumeFactor) {
+        mUnMute_ = true;
+    }
+    AUDIO_INFO_LOG("mUnMute_ %{public}d", mUnMute_);
     pa_threaded_mainloop_lock(mainLoop);
 
     mVolumeFactor = volume;
@@ -2005,6 +2012,14 @@ void AudioServiceClient::SetPaVolume(const AudioServiceClient &client)
         vol = MIN_STREAM_VOLUME_LEVEL;
     }
 
+    if (client.mAudioSystemMgr->IsStreamMute(static_cast<AudioSystemManager::AudioVolumeType>(client.mStreamType))) {
+        if (client.mUnMute_) {
+            client.mAudioSystemMgr->SetMute(static_cast<AudioSystemManager::AudioVolumeType>(client.mStreamType),
+                false);
+        } else {
+            vol = MIN_STREAM_VOLUME_LEVEL;
+        }
+    }
     uint32_t volume = pa_sw_volume_from_linear(vol);
     pa_cvolume_set(&cv, client.volumeChannels, volume);
     pa_operation_unref(pa_context_set_sink_input_volume(client.context, client.streamIndex, &cv, nullptr, nullptr));
