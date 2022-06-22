@@ -172,16 +172,21 @@ static void ThreadFuncUseTiming(void *userdata)
 
         // Render some data and drop it immediately
         if (u->render_in_idle_state && PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
-            if (u->timestamp <= now)
+            if (u->timestamp <= now && pa_atomic_load(&u->dflag) == 0) {
+                pa_atomic_add(&u->dflag, 1);
                 ProcessRenderUseTiming(u, now);
-            pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp);
+            }
+
+            pa_usec_t sleep_for_usec = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
+            pa_rtpoll_set_timer_relative(u->rtpoll, sleep_for_usec);
         } else if (!u->render_in_idle_state && PA_SINK_IS_RUNNING(u->sink->thread_info.state)) {
             if (u->timestamp <= now && pa_atomic_load(&u->dflag) == 0) {
                 pa_atomic_add(&u->dflag, 1);
                 ProcessRenderUseTiming(u, now);
             }
 
-            pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp);
+            pa_usec_t sleep_for_usec = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
+            pa_rtpoll_set_timer_relative(u->rtpoll, sleep_for_usec);
         } else {
             pa_rtpoll_set_timer_disabled(u->rtpoll);
         }
