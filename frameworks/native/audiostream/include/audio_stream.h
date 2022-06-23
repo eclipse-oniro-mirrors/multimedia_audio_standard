@@ -85,7 +85,7 @@ private:
     std::atomic<bool> isWriteInProgress_;
     bool resetTime_;
     uint64_t resetTimestamp_;
-    struct timespec baseTimestamp_;
+    struct timespec baseTimestamp_ = {0};
     AudioRenderMode renderMode_;
     AudioCaptureMode captureMode_;
     std::queue<BufferDesc> freeBufferQ_;

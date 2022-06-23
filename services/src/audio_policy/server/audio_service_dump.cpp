@@ -302,7 +302,7 @@ void AudioServiceDump::PlaybackStreamDump(std::string &dumpString)
         AppendFormat(dumpString, "Stream Id: %s\n", (sinkInputInfo.sessionId).c_str());
         AppendFormat(dumpString, "Application Name: %s\n", ((sinkInputInfo.applicationName).c_str()));
         AppendFormat(dumpString, "Process Id: %s\n", (sinkInputInfo.processId).c_str());
-        AppendFormat(dumpString, "User Id: %d\n", sinkInputInfo.userId);
+        AppendFormat(dumpString, "User Id: %u\n", sinkInputInfo.userId);
 
         char *inputSampleSpec = pa_sample_spec_snprint(s, sizeof(s), &(sinkInputInfo.sampleSpec));
         AppendFormat(dumpString, "Stream Configuration: %s\n", inputSampleSpec);

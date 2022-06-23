@@ -106,7 +106,7 @@ private:
 
     bool isMainLoopStarted;
     bool isContextConnected;
-    AudioData audioData_;
+    AudioData audioData_ = {};
 
     int32_t ConnectStreamToPA();
     void ResetPAAudioDump();

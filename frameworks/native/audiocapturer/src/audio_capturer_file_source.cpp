@@ -15,6 +15,7 @@
 
 #include "audio_capturer_file_source.h"
 
+#include <cerrno>
 #include <cstring>
 #include <dlfcn.h>
 #include <string>
@@ -38,7 +39,6 @@ AudioCapturerFileSource::~AudioCapturerFileSource()
 
 AudioCapturerFileSource *AudioCapturerFileSource::GetInstance()
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource %{public}s", __func__);
     static AudioCapturerFileSource audioCapturer;
 
     return &audioCapturer;
@@ -46,7 +46,6 @@ AudioCapturerFileSource *AudioCapturerFileSource::GetInstance()
 
 void AudioCapturerFileSource::DeInit()
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource %{public}s", __func__);
     if (filePtr != nullptr) {
         fclose(filePtr);
         filePtr = nullptr;
@@ -55,8 +54,24 @@ void AudioCapturerFileSource::DeInit()
 
 int32_t AudioCapturerFileSource::Init(const char *filePath)
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource Init");
-    filePtr = fopen(filePath, "rb");
+    char realPath[PATH_MAX + 1] = {0x00};
+    std::string sourceFilePath(filePath);
+    std::string rootPath;
+    std::string fileName;
+
+    auto pos = sourceFilePath.rfind("/");
+    if (pos!= std::string::npos) {
+        rootPath = sourceFilePath.substr(0, pos);
+        fileName = sourceFilePath.substr(pos);
+    }
+
+    if ((strlen(sourceFilePath.c_str()) >= PATH_MAX) || (realpath(rootPath.c_str(), realPath) == nullptr)) {
+        AUDIO_ERR_LOG("AudioCapturerFileSource:: Invalid path errno = %{public}d", errno);
+        return ERROR;
+    }
+
+    std::string verifiedPath(realPath);
+    filePtr = fopen(verifiedPath.append(fileName).c_str(), "rb");
     if (filePtr == nullptr) {
         AUDIO_ERR_LOG("Error opening pcm test file!");
         return ERROR;
@@ -67,14 +82,13 @@ int32_t AudioCapturerFileSource::Init(const char *filePath)
 
 int32_t AudioCapturerFileSource::CaptureFrame(char *frame, uint64_t requestBytes, uint64_t &replyBytes)
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource %{public}s", __func__);
     if (filePtr == nullptr) {
         AUDIO_ERR_LOG("Invalid filePtr!");
         return ERROR;
     }
 
     if (feof(filePtr)) {
-        AUDIO_ERR_LOG("End of the file reached, start reading from beginning");
+        AUDIO_INFO_LOG("End of the file reached, start reading from beginning");
         rewind(filePtr);
     }
 
@@ -85,13 +99,11 @@ int32_t AudioCapturerFileSource::CaptureFrame(char *frame, uint64_t requestBytes
 
 int32_t AudioCapturerFileSource::Start(void)
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource %{public}s", __func__);
     return SUCCESS;
 }
 
 int32_t AudioCapturerFileSource::Stop(void)
 {
-    AUDIO_ERR_LOG("AudioCapturerFileSource %{public}s", __func__);
     if (filePtr != nullptr) {
         fclose(filePtr);
         filePtr = nullptr;
