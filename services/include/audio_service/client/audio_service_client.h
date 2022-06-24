@@ -265,7 +265,7 @@ public:
     * @param timeStamp will be filled up with current timestamp
     * @return Returns {@code 0} if success; returns {@code -1} otherwise.
     */
-    int32_t GetCurrentTimeStamp(uint64_t &timeStamp) const;
+    int32_t GetCurrentTimeStamp(uint64_t &timeStamp);
 
     /**
     * Provides the current latency for playback/record stream created using CreateStream
