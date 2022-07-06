@@ -433,12 +433,16 @@ size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
     stream.buffer = buffer;
     stream.bufferLen = buffer_size;
     isWriteInProgress_ = true;
+
+#ifdef LATENCY_ACCURACY_TEST
     if (isFirstWrite_) {
         if (RenderPrebuf(stream.bufferLen)) {
             return ERR_WRITE_FAILED;
         }
         isFirstWrite_ = false;
     }
+#endif // LATENCY_ACCURACY_TEST
+
     size_t bytesWritten = WriteStream(stream, writeError);
     isWriteInProgress_ = false;
     if (writeError != 0) {
