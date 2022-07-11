@@ -25,7 +25,6 @@ group("modules") {
     ":module-native-protocol-unix",
     ":module-pipe-sink",
     ":module-pipe-source",
-    ":module-suspend-on-idle",
   ]
 }
 
@@ -154,22 +153,6 @@ ohos_shared_library("module-pipe-sink") {
 ohos_shared_library("module-pipe-source") {
   sources = [ "$pulseaudio_dir/src/modules/module-pipe-source.c" ]
   cflags = [ "-DPA_MODULE_NAME=libmodule_pipe_source_z_so" ]
-
-  ldflags = [
-    "-Wl",
-    "--no-undefined",
-  ]
-
-  configs = [ ":common_config" ]
-  deps = [ ":common_deps" ]
-
-  subsystem_name = "multimedia"
-  part_name = "multimedia_audio_standard"
-}
-
-ohos_shared_library("module-suspend-on-idle") {
-  sources = [ "$pulseaudio_dir/src/modules/module-suspend-on-idle.c" ]
-  cflags = [ "-DPA_MODULE_NAME=libmodule_suspend_on_idle_z_so" ]
 
   ldflags = [
     "-Wl",
