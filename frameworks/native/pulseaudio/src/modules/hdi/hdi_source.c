@@ -64,6 +64,7 @@ struct Userdata {
     pa_rtpoll *rtpoll;
     uint32_t buffer_size;
     uint32_t open_mic_speaker;
+    uint32_t sourceStreamCount;
     pa_usec_t block_usec;
     pa_usec_t timestamp;
     SourceAttr attrs;
@@ -342,6 +343,78 @@ static int pa_set_source_properties(pa_module *m, pa_modargs *ma, const pa_sampl
     return 0;
 }
 
+static pa_hook_result_t SourceStreamDisconnectCb(pa_core *c, pa_source_output *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_source_output_assert_ref(s);
+
+    if (!u->source || !s->source) {
+        AUDIO_ERR_LOG("SourceStreamDisconnectCb error");
+        return PA_HOOK_OK;
+    }
+
+    if (u->source->index != s->source->index) {
+        return PA_HOOK_OK;
+    }
+
+    u->sourceStreamCount--;
+
+    if (u->sourceStreamCount == 0) {
+        pa_source_suspend(s->source, true, PA_SUSPEND_IDLE);
+        pa_core_maybe_vacuum(s->core);
+    }
+
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t SourceStreamConnectCb(pa_core *c, pa_source_output *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_source_output_assert_ref(s);
+
+    if (!u->source || !s->source) {
+        AUDIO_ERR_LOG("SourceStreamConnectCb error");
+        return PA_HOOK_OK;
+    }
+
+    // Callback for non default source can be ignored
+    if (u->source->index != s->source->index) {
+        return PA_HOOK_OK;
+    }
+
+    if (!PA_SOURCE_IS_OPENED(s->source->state)) {
+        u->sourceStreamCount = 0;
+        pa_source_suspend(s->source, false, PA_SUSPEND_IDLE);
+    }
+
+    u->sourceStreamCount++;
+
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t SourceStreamMoveFinishCb(pa_core *c, pa_source_output *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_source_output_assert_ref(s);
+
+    if (!u->source || !s->source) {
+        AUDIO_ERR_LOG("SourceStreamMoveFinishCb error");
+        return PA_HOOK_OK;
+    }
+
+    // Callback for non default source can be ignored
+    if (u->source->index != s->source->index) {
+        return PA_HOOK_OK;
+    }
+
+    u->sourceStreamCount = pa_idxset_size(s->source->outputs);
+    if (!PA_SOURCE_IS_OPENED(s->source->state) && u->sourceStreamCount > 0) {
+        pa_source_suspend(s->source, false, PA_SUSPEND_IDLE);
+    }
+
+    return PA_HOOK_OK;
+}
+
 static enum AudioFormat ConvertToHDIAudioFormat(pa_sample_format_t format)
 {
     enum AudioFormat hdiAudioFormat;
@@ -461,6 +534,17 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver)
     }
 
     pa_source_put(u->source);
+    // Start modules in suspended state
+    pa_source_suspend(u->source, true, PA_SUSPEND_IDLE);
+
+    // register for source callbacks
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_UNLINK], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SourceStreamDisconnectCb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_PUT], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SourceStreamConnectCb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_MOVE_FINISH], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SourceStreamMoveFinishCb, u);
+
     return u->source;
 
 fail:
