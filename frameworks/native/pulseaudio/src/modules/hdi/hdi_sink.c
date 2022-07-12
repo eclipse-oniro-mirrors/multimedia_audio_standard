@@ -48,6 +48,7 @@ const char *DEVICE_CLASS_A2DP = "a2dp";
 
 struct Userdata {
     uint32_t buffer_size;
+    uint32_t sinkStreamCount;
     size_t bytes_dropped;
     pa_thread_mq thread_mq;
     pa_memchunk memchunk;
@@ -322,6 +323,78 @@ static int SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState,
     return 0;
 }
 
+static pa_hook_result_t SinkStreamDisconnectCb(pa_core *c, pa_sink_input *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_sink_input_assert_ref(s);
+
+    if (!s->sink || !u->sink) {
+        AUDIO_ERR_LOG("SinkStreamDisconnectCb error");
+        return PA_HOOK_OK;
+    }
+
+    if (u->sink->index != s->sink->index) {
+        return PA_HOOK_OK;
+    }
+
+    u->sinkStreamCount--;
+
+    if (u->sinkStreamCount == 0) {
+        pa_sink_suspend(s->sink, true, PA_SUSPEND_IDLE);
+        pa_core_maybe_vacuum(s->core);
+    }
+
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t SinkStreamConnectCb(pa_core *c, pa_sink_input *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_sink_input_assert_ref(s);
+
+    if (!s->sink || !u->sink) {
+        AUDIO_ERR_LOG("SinkStreamConnectCb error");
+        return PA_HOOK_OK;
+    }
+
+    // Callback for non default sink can be ignored
+    if (u->sink->index != s->sink->index) {
+        return PA_HOOK_OK;
+    }
+
+    if (!PA_SINK_IS_OPENED(s->sink->state)) {
+        u->sinkStreamCount = 0;
+        pa_sink_suspend(s->sink, false, PA_SUSPEND_IDLE);
+    }
+
+    u->sinkStreamCount++;
+
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t SinkStreamMoveFinishCb(pa_core *c, pa_sink_input *s, struct Userdata *u)
+{
+    pa_assert(u);
+    pa_sink_input_assert_ref(s);
+
+    if (!s->sink || !u->sink) {
+        AUDIO_ERR_LOG("SinkStreamMoveFinishCb error");
+        return PA_HOOK_OK;
+    }
+
+    // Callback for non default sink can be ignored
+    if (u->sink->index != s->sink->index) {
+        return PA_HOOK_OK;
+    }
+
+    u->sinkStreamCount = pa_idxset_size(s->sink->inputs);
+    if (!PA_SINK_IS_OPENED(s->sink->state) && u->sinkStreamCount > 0) {
+        pa_sink_suspend(s->sink, false, PA_SUSPEND_IDLE);
+    }
+
+    return PA_HOOK_OK;
+}
+
 static enum AudioFormat ConvertToHDIAudioFormat(pa_sample_format_t format)
 {
     enum AudioFormat hdiAudioFormat;
@@ -488,6 +561,16 @@ pa_sink *PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver)
         goto fail;
     }
     pa_sink_put(u->sink);
+    // Start modules in suspended state
+    pa_sink_suspend(u->sink, true, PA_SUSPEND_IDLE);
+
+    // register for sink callbacks
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SINK_INPUT_UNLINK], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SinkStreamDisconnectCb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SINK_INPUT_PUT], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SinkStreamConnectCb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SINK_INPUT_MOVE_FINISH], PA_HOOK_NORMAL,
+        (pa_hook_cb_t) SinkStreamMoveFinishCb, u);
 
     return u->sink;
 fail:
