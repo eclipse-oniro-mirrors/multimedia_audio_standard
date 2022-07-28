@@ -52,7 +52,15 @@ SLresult AudioCapturerAdapter::CreateAudioCapturerAdapter(SLuint32 id, SLDataSou
     AudioCapturerParams capturerParams;
     ConvertPcmFormat(pcmFormat, &capturerParams);
     streamType = AudioStreamType::STREAM_MUSIC;
-    unique_ptr<AudioCapturer> capturerHolder = AudioCapturer::Create(streamType);
+    AudioCapturerOptions capturerOptions;
+    capturerOptions.streamInfo.samplingRate = capturerParams.samplingRate;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = capturerParams.audioSampleFormat;
+    capturerOptions.streamInfo.channels = capturerParams.audioChannel;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_MIC;
+    capturerOptions.capturerInfo.capturerFlags = 0;
+    string cachePath = "/data/storage/el2/base/haps/entry/files";
+    unique_ptr<AudioCapturer> capturerHolder = AudioCapturer::Create(capturerOptions, cachePath.c_str());
     capturerHolder->SetParams(capturerParams);
     AudioCapturer *capturer = capturerHolder.release();
     AUDIO_INFO_LOG("AudioCapturerAdapter::CreateAudioCapturerAdapter ID: %{public}lu", id);
@@ -138,13 +146,13 @@ SLresult AudioCapturerAdapter::GetStateAdapter(SLuint32 id, SLOHBufferQueueState
     return SL_RESULT_SUCCESS;
 }
 
-SLresult AudioCapturerAdapter::GetBufferAdapter(SLuint32 id, SLuint8 **buffer, SLuint32 &size)
+SLresult AudioCapturerAdapter::GetBufferAdapter(SLuint32 id, SLuint8 **buffer, SLuint32 *size)
 {
     AudioCapturer *audioCapturer = GetAudioCapturerById(id);
     BufferDesc bufferDesc = {};
     audioCapturer->GetBufferDesc(bufferDesc);
     *buffer = bufferDesc.buffer;
-    size = bufferDesc.bufLength;
+    *size = bufferDesc.bufLength;
     return SL_RESULT_SUCCESS;
 }
 
