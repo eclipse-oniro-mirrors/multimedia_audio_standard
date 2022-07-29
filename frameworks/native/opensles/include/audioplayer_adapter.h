@@ -41,9 +41,9 @@ public:
     SLresult EnqueueAdapter(SLuint32 id, const void *buffer, SLuint32 size);
     SLresult ClearAdapter(SLuint32 id);
     SLresult GetStateAdapter(SLuint32 id, SLOHBufferQueueState *state);
-    SLresult GetBufferAdapter(SLuint32 id, SLuint8 **buffer, SLuint32 &size);
+    SLresult GetBufferAdapter(SLuint32 id, SLuint8 **buffer, SLuint32 *size);
     SLresult RegisterCallbackAdapter(SLOHBufferQueueItf itf, SlOHBufferQueueCallback callback, void *pContext);
-    
+
 private:
     AudioPlayerAdapter();
     ~AudioPlayerAdapter();

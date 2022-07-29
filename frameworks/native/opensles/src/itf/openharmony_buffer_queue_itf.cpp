@@ -62,7 +62,7 @@ SLresult GetState(SLOHBufferQueueItf self, SLOHBufferQueueState *state)
     return SL_RESULT_SUCCESS;
 }
 
-SLresult GetBuffer(SLOHBufferQueueItf self, SLuint8 **buffer, SLuint32 &size)
+static SLresult GetBuffer(SLOHBufferQueueItf self, SLuint8 **buffer, SLuint32 *size)
 {
     if (self == nullptr) {
         return SL_RESULT_PARAMETER_INVALID;

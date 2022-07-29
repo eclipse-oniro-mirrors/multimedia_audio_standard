@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
 opensles_dir = "//third_party/openSLES"
+opensles_version = "1.0.1"
 
 config("audio_config") {
   include_dirs = [
@@ -42,7 +43,7 @@ config("audio_config") {
 
 ohos_shared_library("opensles") {
   include_dirs = [
-    "$opensles_dir/api/1.0.1",
+    "$opensles_dir/api/$opensles_version",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/include",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/andiorenderer/include/",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/andiocapturer/include/",
@@ -52,7 +53,8 @@ ohos_shared_library("opensles") {
   configs = [ ":audio_config" ]
 
   sources = [
-    "$opensles_dir/api/1.0.1/OpenSLES_IID.c",
+    "$opensles_dir/api/$opensles_version/OpenSLES_IID.c",
+    "$opensles_dir/api/$opensles_version/OpenSLES_OpenHarmony_IID.c",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/audiocapturer_adapter.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/audioplayer_adapter.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/readorwritecallback_adapter.cpp",
@@ -66,7 +68,6 @@ ohos_shared_library("opensles") {
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/audioplayer_obj.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/engine_obj.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/output_mix_obj.cpp",
-    "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/OpenSLES_OpenHarmony_IID.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/builder.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/table_struct.cpp",
   ]
@@ -78,9 +79,18 @@ ohos_shared_library("opensles") {
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocapturer:audio_capturer",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiomanager:audio_client",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer:audio_renderer",
+    "//utils/native/base:utils",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+  ]
 
   output_name = "OpenSLES"
   output_extension = "so"
